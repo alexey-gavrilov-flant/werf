@@ -19,6 +19,42 @@ import (
 	"github.com/werf/werf/pkg/util"
 )
 
+/*
+
+git:
+ - add: /   # (1)
+   to: /app
+ - add: /src  # (2)
+   to: /app/src
+ - add: /src # (5)
+   to: /app/src2
+ - add: /myfile # (3)
+   to: /renamed_file
+ - add: /src/myfile # (4)
+   to: /a/b/c/FILE
+
+команда распаковки:
+(1),(2),(5): tar -C <to> archive.tar
+(4),(3): tar -C <dirname(to)> archive.tar
+
+создание архива:
+(1): ArchiveOptions{PathScope=/}
+=> (1).tar: сразу файлы из git-папки / (path-scope=/)
+
+(2): ArchiveOptions{PathScope=/src}
+=> (2).tar: сразу файлы из git-папки /src (path-scope=/src)
+
+(3): ArchiveOptions{PathScope=/,Renames={myfile=>renamed_file}}
+=> (3).tar: /renamed_file (path-scope=/)
+
+(4): ArchiveOptions{PathScope=/src,Renames={myfile=>FILE}}
+=> (4).tar: /FILE (path-scope=/src)
+
+(5): ArchiveOptions{PathScope=/src}
+=> (5).tar: сразу файлы из git-папки /src (path-scope=/src)
+
+*/
+
 type ArchiveOptions struct {
 	Commit string
 
@@ -26,6 +62,7 @@ type ArchiveOptions struct {
 	PathScope string
 
 	PathMatcher path_matcher.PathMatcher
+	Renames map[string]string
 }
 
 func (opts ArchiveOptions) ID() string {
