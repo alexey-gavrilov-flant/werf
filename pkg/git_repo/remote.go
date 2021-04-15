@@ -316,13 +316,8 @@ func (repo *Remote) GetOrCreateArchive(ctx context.Context, opts ArchiveOptions)
 	return repo.getOrCreateArchive(ctx, repo.GetClonePath(), repo.GetClonePath(), repo.getRepoID(), repo.getWorkTreeCacheDir(repo.getRepoID()), opts)
 }
 
-func (repo *Remote) GetOrCreateChecksum(ctx context.Context, opts ChecksumOptions) (checksum string, err error) {
-	err = repo.yieldRepositoryBackedByWorkTree(ctx, opts.Commit, func(repository *git.Repository) error {
-		checksum, err = repo.getOrCreateChecksum(ctx, repository, opts)
-		return err
-	})
-
-	return
+func (repo *Remote) GetOrCreateChecksum(ctx context.Context, opts ChecksumOptions) (string, error) {
+	return repo.getOrCreateChecksum(ctx, repo.yieldRepositoryBackedByWorkTree, opts)
 }
 
 func (repo *Remote) IsCommitExists(ctx context.Context, commit string) (bool, error) {
